@@ -1,0 +1,28 @@
+package check
+
+/*
+	The package contains the fields which are reserved in Kibana.
+*/
+
+import (
+	"github.com/iostrovok/kibana-fields"
+
+	<IMPORTS>
+)
+
+// AllFields includes all fields which are used in the subpackages.
+var AllFields []fields.Field
+
+// Check equals the AllFields but is provided as hash for fast checking.
+var Check map[string]bool
+
+func init() {
+	AllFields = make([]fields.Field, 0)
+
+	<ALL_FIELDS>
+
+	Check = make(map[string]bool, 0)
+	for _, v := range AllFields {
+		Check[v.String()] = true
+	}
+}

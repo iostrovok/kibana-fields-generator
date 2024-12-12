@@ -1,0 +1,11 @@
+package fields_test
+
+import (
+	"testing"
+
+	<IMPORTS>
+)
+
+func TestSyntax(t *testing.T) {
+	t.Log("TestSyntax")
+}

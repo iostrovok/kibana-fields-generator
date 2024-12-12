@@ -1,0 +1,19 @@
+package <PACKAGE_NAME>
+
+import "github.com/iostrovok/kibana-fields"
+
+// All available fields as constants
+const (
+<CONST>
+)
+
+// Fields contains all package constants as list
+var Fields = []fields.Field{
+<FIELDS>
+}
+
+<EXPECTED_AND_ALLOWED_VALUES>
+
+// TypesType describes kibana types of fields to check values
+<TYPES_CHECKER>
+
