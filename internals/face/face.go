@@ -1,6 +1,7 @@
 package face
 
 type Set struct {
+	Alpha       string            `yaml:"alpha" json:"alpha"`
 	Beta        string            `yaml:"beta" json:"beta"`
 	Name        string            `yaml:"name" json:"name"`
 	Prefix      string            `yaml:"prefix" json:"prefix"`
@@ -52,30 +53,41 @@ type AllowedValue struct {
 	ExpectedEventTypes []string `yaml:"expected_event_types" json:"expected_event_types"`
 }
 
+type Otel struct {
+	Note      string `yaml:"note" json:"note"`
+	Metric    string `yaml:"metric" json:"metric"`
+	OtlpField string `yaml:"otlp_field" json:"otlp_field"`
+	Relation  string `yaml:"relation" json:"relation"`
+	Stability string `yaml:"stability" json:"stability"`
+	Attribute string `yaml:"attribute" json:"attribute"`
+}
+
 type Field struct {
-	AllowedValues    []*AllowedValue `yaml:"allowed_values" json:"allowed_values"`
-	Beta             string          `yaml:"beta" json:"beta"`
-	DashedName       string          `yaml:"dashed_name" json:"dashed_name"`
-	Description      string          `yaml:"description" json:"description"`
-	DocValues        bool            `yaml:"doc_values" json:"doc_values"`
-	Index            bool            `yaml:"index" json:"index"`
-	Required         bool            `yaml:"required" json:"required"`
-	InputFormat      string          `yaml:"input_format" json:"input_format"`
-	ObjectType       string          `yaml:"object_type" json:"object_type"`
-	OutputFormat     string          `yaml:"output_format" json:"output_format"`
-	OutputPrecision  int             `yaml:"output_precision" json:"output_precision"`
-	Example          string          `yaml:"example" json:"example"`
-	ExpectedValues   []string        `yaml:"expected_values" json:"expected_values"`
-	FlatName         string          `yaml:"flat_name" json:"flat_name"`
-	Format           string          `yaml:"format" json:"format"`
-	IgnoreAbove      int             `yaml:"ignore_above" json:"ignore_above"`
-	Level            string          `yaml:"level" json:"level"`
-	MultiFields      []*MultiFields  `yaml:"multi_fields" json:"multi_fields"`
-	Name             string          `yaml:"name" json:"name"`
-	Normalize        []string        `yaml:"normalize" json:"normalize"`
-	ScalingFactor    int             `yaml:"scaling_factor" json:"scaling_factor"`
-	Pattern          string          `yaml:"pattern" json:"pattern"`
-	OriginalFieldset string          `yaml:"original_fieldset" json:"original_fieldset"`
-	Short            string          `yaml:"short" json:"short"`
-	Type             string          `yaml:"type" json:"type"`
+	AllowedValues       []*AllowedValue `yaml:"allowed_values" json:"allowed_values"`
+	Beta                string          `yaml:"beta" json:"beta"`
+	DashedName          string          `yaml:"dashed_name" json:"dashed_name"`
+	Description         string          `yaml:"description" json:"description"`
+	DocValues           bool            `yaml:"doc_values" json:"doc_values"`
+	Index               bool            `yaml:"index" json:"index"`
+	Required            bool            `yaml:"required" json:"required"`
+	InputFormat         string          `yaml:"input_format" json:"input_format"`
+	ObjectType          string          `yaml:"object_type" json:"object_type"`
+	OutputFormat        string          `yaml:"output_format" json:"output_format"`
+	OutputPrecision     int             `yaml:"output_precision" json:"output_precision"`
+	Example             string          `yaml:"example" json:"example"`
+	ExpectedValues      []string        `yaml:"expected_values" json:"expected_values"`
+	FlatName            string          `yaml:"flat_name" json:"flat_name"`
+	Format              string          `yaml:"format" json:"format"`
+	IgnoreAbove         int             `yaml:"ignore_above" json:"ignore_above"`
+	Level               string          `yaml:"level" json:"level"`
+	MultiFields         []*MultiFields  `yaml:"multi_fields" json:"multi_fields"`
+	Name                string          `yaml:"name" json:"name"`
+	Normalize           []string        `yaml:"normalize" json:"normalize"`
+	Otel                []*Otel         `yaml:"otel" json:"otel"`
+	ScalingFactor       int             `yaml:"scaling_factor" json:"scaling_factor"`
+	Pattern             string          `yaml:"pattern" json:"pattern"`
+	OriginalFieldset    string          `yaml:"original_fieldset" json:"original_fieldset"`
+	Short               string          `yaml:"short" json:"short"`
+	Type                string          `yaml:"type" json:"type"`
+	SyntheticSourceKeep string          `yaml:"synthetic_source_keep" json:"synthetic_source_keep"`
 }

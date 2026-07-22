@@ -22,13 +22,13 @@ type ConstData struct {
 	Name, Value, Comment, Type string
 }
 
-func RunOneSet(setName string, set *face.Set, outPutPath, template string) (err error) {
+func RunOneSet(setName string, set *face.Set, outPutPath, template string) (globalFields []string, err error) {
 	constsData := make([]*ConstData, 0)
 	fieldsData := make([]string, 0)
 	expectedAndAllowedValues := make([]string, 0)
 
 	if err := os.MkdirAll(outPutPath, 0755); err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(errors.Wrap(err, `os.MkdirAll failed in `+outPutPath))
 	}
 
 	for fieldName := range set.Fields {
@@ -54,9 +54,9 @@ func RunOneSet(setName string, set *face.Set, outPutPath, template string) (err 
 		}
 	}
 
-	typesChecker, err := CheckValues(constsData)
+	fieldSets, typesChecker, err := CheckValues(constsData)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	sort.Strings(fieldsData)
@@ -81,17 +81,27 @@ func RunOneSet(setName string, set *face.Set, outPutPath, template string) (err 
 
 	formatTemplate, err := format.Source([]byte(template))
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	dir := path.Join(outPutPath, pkgName)
 	fmt.Printf("save %s to %s\n", setName, dir)
 	if err := checkDirFile(dir); err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	fileName := path.Join(outPutPath, pkgName, pkgName+".go")
-	return errors.WithStack(os.WriteFile(fileName, formatTemplate, 0755))
+	return fieldSets, errors.WithStack(os.WriteFile(fileName, formatTemplate, 0755))
+}
+
+func RemoveAllSets(outPutPath string) error {
+	fmt.Printf("RemoveAllSets outCheckPutPath: %s\n", outPutPath)
+
+	if err := os.RemoveAll(outPutPath); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }
 
 func checkDefaultGoNames(setName string) string {

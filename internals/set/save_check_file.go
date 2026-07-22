@@ -1,6 +1,7 @@
 package set
 
 import (
+	"fmt"
 	"go/format"
 	"os"
 	"path"
@@ -10,12 +11,17 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	CheckGoFile = "check.go"
+	CheckPath   = "check"
+)
+
 func SaveCheckFile(packagePath, outPutPath, template string, sets []string) (err error) {
 	if err := os.MkdirAll(outPutPath, 0755); err != nil {
 		return errors.WithStack(err)
 	}
 
-	outCheckPutPath := path.Join(outPutPath, "check")
+	outCheckPutPath := path.Join(outPutPath, CheckPath)
 	if err := os.MkdirAll(outCheckPutPath, 0755); err != nil {
 		return errors.WithStack(err)
 	}
@@ -39,6 +45,38 @@ func SaveCheckFile(packagePath, outPutPath, template string, sets []string) (err
 		return err
 	}
 
-	fileName := path.Join(outCheckPutPath, "check.go")
+	fileName := path.Join(outCheckPutPath, CheckGoFile)
 	return os.WriteFile(fileName, byteTemplate, 0755)
+}
+
+func SaveCheckTestFile(packagePath, outPutPath, template, imp string) (err error) {
+	outCheckPutPath := path.Join(outPutPath, CheckPath)
+
+	if err := os.MkdirAll(outCheckPutPath, 0755); err != nil {
+		return errors.WithStack(err)
+	}
+
+	imp = fmt.Sprintf("_ \"%s\"\n", imp)
+
+	template = strings.Replace(template, "<IMPORTS>", imp, 1)
+	template = strings.Replace(template, "<PACKAGE>", "check_test", 1)
+
+	byteTemplate, err := format.Source([]byte(template))
+	if err != nil {
+		return err
+	}
+
+	fileName := path.Join(outCheckPutPath, "syntax_test.go")
+	return os.WriteFile(fileName, byteTemplate, 0755)
+}
+
+func RemoveCheckFile(outPutPath string) error {
+	outCheckPutPath := path.Join(outPutPath, CheckPath)
+	fmt.Printf("RemoveCheckFile outCheckPutPath: %s\n", outCheckPutPath)
+
+	if err := os.RemoveAll(outCheckPutPath); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }

@@ -20,5 +20,4 @@ vendor/
 # Go workspace file
 go.work
 .idea/
-go.sum
-result/
+.DS_Store

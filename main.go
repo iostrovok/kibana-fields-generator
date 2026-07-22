@@ -4,6 +4,7 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -14,15 +15,15 @@ import (
 )
 
 const (
-	importPath     = "github.com/iostrovok/kibana-fields"
-	source         = "https://raw.githubusercontent.com/elastic/ecs/<VERSION>/generated/ecs/ecs_nested.yml"
-	defaultVersion = "8.12"
+	importPath = "/x"
+	importPkg  = "github.com/iostrovok/kibana-fields"
+	source     = "https://raw.githubusercontent.com/elastic/ecs/<VERSION>/generated/ecs/ecs_nested.yml"
 )
 
 var (
 	savePath      = flag.String("path", "", `path for saving generated files`)
-	version       = flag.String("version", "8.12", `version of ecs`)
-	pkgImportPath = importPath + "/x"
+	version       = flag.String("version", "9.4", `version of ecs`)
+	pkgImportPath = importPkg + importPath
 	pkgSavePath   = ""
 )
 
@@ -30,6 +31,7 @@ var (
 //go:embed templates/syntax_test.txt
 //go:embed templates/check.txt
 //go:embed templates/README.md
+//go:embed templates/fields.txt
 var FILES embed.FS
 
 type Set struct {
@@ -45,6 +47,9 @@ type Set struct {
 
 func init() {
 	flag.Parse()
+	if *savePath == "" {
+		fmt.Printf("pathss should be set up\n")
+	}
 	pkgSavePath = *savePath + "/x"
 }
 
@@ -63,6 +68,11 @@ func main() {
 	fmt.Printf("\nLoad templtes\n")
 	fmt.Printf("\nurl: %s\n", url)
 	time.Sleep(1 * time.Second)
+
+	if err := set.RemoveAll(*savePath, *savePath+importPath); err != nil {
+		fmt.Printf("ERROR: %+v\n", err)
+		return
+	}
 
 	template, err := FILES.ReadFile("templates/template.txt")
 	if err != nil {
@@ -88,18 +98,28 @@ func main() {
 		return
 	}
 
+	fieldsTemplate, err := FILES.ReadFile("templates/fields.txt")
+	if err != nil {
+		fmt.Printf("ERROR: %+v\n", err)
+		return
+	}
+
 	fmt.Printf("\nRun set files...\n")
 	setName := sortSetNames(ecsNested)
+	globalFields := make([]string, 0)
 	for _, setName := range setName {
 		fmt.Printf("\nstart '%s'\n", setName)
-		if err := set.RunOneSet(setName, ecsNested[setName], pkgSavePath, string(template)); err != nil {
+		fieldSet, err := set.RunOneSet(setName, ecsNested[setName], pkgSavePath, string(template))
+		if err != nil {
 			fmt.Printf("ERROR: %+v\n", err)
 			return
 		}
+
+		globalFields = append(globalFields, fieldSet...)
 	}
 
 	fmt.Printf("\nRun test files...\n")
-	if err := set.SaveTestFile(pkgImportPath, *savePath, string(testTemplate), setName); err != nil {
+	if err := set.SaveTestFile(pkgImportPath, *savePath, string(testTemplate), "fields_test", setName); err != nil {
 		fmt.Printf("ERROR: %+v\n", err)
 		return
 	}
@@ -110,8 +130,28 @@ func main() {
 		return
 	}
 
+	if err := set.SaveCheckTestFile(pkgImportPath, *savePath, string(testTemplate), importPkg+"/check"); err != nil {
+		fmt.Printf("ERROR: %+v\n", err)
+		return
+	}
+
 	fmt.Printf("\nRun README files...\n")
 	if err := set.SaveReadmeFile(*savePath, string(readTemplate), *version); err != nil {
+		fmt.Printf("ERROR: %+v\n", err)
+		return
+	}
+
+	slices.Sort(globalFields)
+	globalFields = slices.CompactFunc(globalFields, strings.EqualFold)
+
+	globalFieldStr := ""
+	for _, v := range globalFields {
+		globalFieldStr += fmt.Sprintf("type %s string\n", v)
+	}
+	fmt.Printf("\nglobalFieldStr: %s\n", globalFieldStr)
+
+	fmt.Printf("\nRun test files...\n")
+	if err := set.SaveFieldsFile(*savePath, string(fieldsTemplate), globalFieldStr); err != nil {
 		fmt.Printf("ERROR: %+v\n", err)
 		return
 	}
